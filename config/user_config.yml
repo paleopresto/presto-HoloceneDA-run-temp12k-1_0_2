@@ -20,7 +20,7 @@
 data_dir: '/'                 # PReSto container layout (/proxies, /models), as the CRE sets it
 
 # Primary options
-exp_name: 'presto12k_baseline_temp12k_1_0_2'
+exp_name: 'presto12k_sens_uncertainty'
 vars_to_reconstruct: ['tas']  # The variables to reconstruct {['tas']}.  Note, only tas is fully supported at the moment.
 time_resolution:     10       # The base temporal resolution, in years {10}
 maximum_resolution:  1000     # The maximum temporal resolution to assimilate proxies at, in years {1000}
@@ -60,3 +60,7 @@ change_uncertainty:  False       # Change uncertainty values in several ways {Fa
    # 'all_#'  Set uncertainty values to a constant number.
    # 'path/to/file.txt' Use uncertainty values from a text file. The file must contain TSids and new MSE values for each proxy.
 
+
+# Sensitivity test (uncertainty): restore Erb et al. (2022) behavior for
+# the switches below; everything else is the baseline run.
+presto_missing_uncertainty: null
