@@ -112,6 +112,17 @@ def load_proxies(options):
                     print('Fixing GISP2 ages:',all_ts_12k[i]['paleoData_variableName'],', Index:',i)
                     all_ts_12k[i]['age'] = gisp2_ages
             #
+            # Erb et al. (2022) kept only records in the Temp12k compilation.
+            # PReSto drops that test by default, since pools are selected
+            # upstream by criteria; presto_require_compilation restores it
+            # (e.g. 'Temp12k' to reproduce the published run on a full
+            # compilation release, which also carries Tverse records).
+            _req = options.get('presto_require_compilation')
+            if _req:
+                all_ts_12k = [r for r in all_ts_12k
+                              if str(_req).lower() in str(r.get('paleoData_inCompilation', '')).lower()
+                              or str(_req).lower() in str(r.get('paleoData_inCompilationBeta', '')).lower()]
+                print('presto_require_compilation =', _req, '->', len(all_ts_12k), 'timeseries')
             proxy_ts_temp12k = lipd.filterTs(all_ts_12k,'paleoData_units == degC')
             if options['reconstruction_type'] == 'absolute': proxy_ts_temp12k = lipd.filterTs(proxy_ts_temp12k,'paleoData_datum == abs')
             # Drop records that still lack 'age' (no year axis either, or
@@ -308,7 +319,12 @@ def process_proxies(proxy_ts,collection_all,options):
         proxy_data['resolution_binned'][i,:] = proxy_res_12ka
         #
         # Get proxy metdata
-        missing_uncertainty_value = 3.0  # °C RMSE fallback (→ 9.0 °C² MSE); avoids dropping records the pickle doesn't carry temperature12kUncertainty for
+        # Records without temperature12kUncertainty: PReSto assigns a 3.0 degC
+        # RMSE (9.0 degC^2 MSE) by default, so pool records that never had a
+        # Temp12k uncertainty are kept. presto_missing_uncertainty: null
+        # restores Erb et al. (2022), who set NaN, which drops the record.
+        _mu = options.get('presto_missing_uncertainty', 3.0)
+        missing_uncertainty_value = np.nan if _mu is None or str(_mu).lower() in ('none', 'null', 'nan', 'drop') else float(_mu)
         proxy_lat                 = proxy_ts[i]['geo_meanLat']
         proxy_lon                 = proxy_ts[i]['geo_meanLon']
         _interp = proxy_ts[i].get('paleoData_interpretation', [{}])
