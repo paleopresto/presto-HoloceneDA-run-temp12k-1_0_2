@@ -20,7 +20,7 @@ presto_config:
   data_dir:
     value: /
   exp_name:
-    value: presto12k_baseline_temp12k_1_0_2
+    value: presto12k_sens_membership
   localization_radius:
     value: None
   maximum_resolution:
@@ -33,6 +33,8 @@ presto_config:
     value: '100'
   percent_to_assimilate:
     value: '100'
+  presto_require_compilation:
+    value: Temp12k
   prior_mean_always_0:
     value: 'False'
   prior_window:
