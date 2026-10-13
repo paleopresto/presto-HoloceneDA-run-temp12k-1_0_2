@@ -61,7 +61,8 @@ change_uncertainty:  False       # Change uncertainty values in several ways {Fa
    # 'path/to/file.txt' Use uncertainty values from a text file. The file must contain TSids and new MSE values for each proxy.
 
 
-# Sensitivity test (erb-exact): restore Erb et al. (2022) behavior for
-# the switches below; everything else is the baseline run.
+# Sensitivity test (erb-exact, template a1b8222): Erb et al. (2022)'s loader
+# switches below, plus the restored seasonality filter (annual, summerOnly,
+# winterOnly), exact Temp12k membership and Erb's seasonality table.
 presto_require_compilation: Temp12k
 presto_missing_uncertainty: null

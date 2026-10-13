@@ -180,15 +180,24 @@ print(' - Number of records with valid values for the chosen experiment: '+str(s
 proxy_ind_with_uncertainty = np.isfinite(proxy_data['uncertainty'])
 print(' - Number of records with uncertainty values: '+str(sum(proxy_ind_with_uncertainty)))
 
-# If requested, select only proxies with certain seasonalities
-#if options['assimilate_selected_seasons']:
-#    proxy_ind_of_seasonality = np.full((n_proxies),False,dtype=bool)
-#    ind_seasons = [i for i, seasontype in enumerate(proxy_data['metadata'][:,5]) if seasontype in options['assimilate_selected_seasons']]
-#    proxy_ind_of_seasonality[ind_seasons] = True
-#    print(' - Number of records with seasonalities '+str(options['assimilate_selected_seasons'])+': '+str(sum(proxy_ind_of_seasonality)))
-#else:
-    
-proxy_ind_of_seasonality = np.full((n_proxies),True,dtype=bool)
+# If requested, select only proxies with certain seasonalities.
+# Erb et al. (2022) assimilate annual, summerOnly and winterOnly records. In
+# Temperature 12k, summer+ and winter+ mark the seasonal reconstructions of a
+# site that also has an annual one, so the filter keeps one record per site.
+# presto_season_filter: false assimilates every seasonality.
+_seasons = options['assimilate_selected_seasons']
+if isinstance(_seasons, str):
+    import ast
+    _seasons = False if _seasons.strip().lower() in ('false', 'none', '') else ast.literal_eval(_seasons)
+_season_filter = str(options.get('presto_season_filter', True)).lower() not in ('false', '0', 'no', 'none')
+if _seasons and _season_filter:
+    proxy_ind_of_seasonality = np.full((n_proxies),False,dtype=bool)
+    ind_seasons = [i for i, seasontype in enumerate(proxy_data['metadata'][:,5]) if seasontype in _seasons]
+    proxy_ind_of_seasonality[ind_seasons] = True
+    print(' - Number of records with seasonalities '+str(_seasons)+': '+str(sum(proxy_ind_of_seasonality)))
+else:
+    proxy_ind_of_seasonality = np.full((n_proxies),True,dtype=bool)
+    print(' - Seasonality filter off: all '+str(n_proxies)+' records eligible')
 
 # If requested, select only certain archive types
 if options['assimilate_selected_archives']:
